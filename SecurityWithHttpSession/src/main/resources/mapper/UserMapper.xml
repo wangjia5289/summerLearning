@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.securitywithhttpsession.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.securitywithhttpsession.entity.User">
+            <id property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="username" column="username" jdbcType="VARCHAR"/>
+            <result property="password" column="password" jdbcType="VARCHAR"/>
+            <result property="isAccountnonexpired" column="is_accountNonExpired" jdbcType="TINYINT"/>
+            <result property="isAccountnonlocked" column="is_accountNonLocked" jdbcType="TINYINT"/>
+            <result property="isCredentialsnonexpired" column="is_credentialsNonExpired" jdbcType="TINYINT"/>
+            <result property="isEnabled" column="is_enabled" jdbcType="TINYINT"/>
+            <result property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="phoneNumber" column="phone_number" jdbcType="VARCHAR"/>
+
+            <collection property="authorities" ofType="org.springframework.security.core.authority.SimpleGrantedAuthority">
+                <constructor>
+                    <arg column="authority_name" javaType="java.lang.String" />
+                </constructor>
+            </collection>
+    </resultMap>
+    <insert id="insertUser" parameterType="String">
+        INSERT INTO users (username, password, email, phone_number) Values (#{username}, #{password}, #{email}, #{phonenumber})
+    </insert>
+
+    <select id="getUserByUserName" resultMap="BaseResultMap" parameterType="String">
+        SELECT
+            users.user_id,
+            users.username,
+            users.password,
+            users.is_accountNonExpired,
+            users.is_accountNonLocked,
+            users.is_credentialsNonExpired,
+            users.is_enabled,
+            users.email,
+            users.phone_number,
+            authorities.authority_name
+        FROM users
+                 LEFT JOIN user_role ON users.user_id = user_role.user_id
+                 LEFT JOIN role_authority ON user_role.role_id = role_authority.role_id
+                 LEFT JOIN authorities ON role_authority.authority_id = authorities.authority_id
+        WHERE users.username = #{username}
+    </select>
+</mapper>
